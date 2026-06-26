@@ -1254,14 +1254,24 @@ body.dark-mode .citation-link:hover {
     background: #374151;
 }
 
+/* આખા પેજ પર ગમે ત્યાં ક્લિક કરવાથી આવતી તમામ ઇફેક્ટ્સ બંધ કરવા */
 * {
     -webkit-tap-highlight-color: transparent !important;
-    -webkit-touch-callout: none; /* લોન્ગ પ્રેસ મેનૂ રોકવા માટે (ઓપ્શનલ) */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
     outline: none !important;
+    box-shadow: none !important;
 }
 
-/* ખાસ કરીને બટન, લિંક અને ક્લિકેબલ વસ્તુઓ માટે */
-button, a, input, select, textarea, [role="button"] {
+/* ખાસ કરીને ક્લિકેબલ એલિમેન્ટ્સ, લિંક્સ, ચેટ બબલ્સ અને સાઇડબાર માટે */
+a, button, input, textarea, select, div, span, li, i, [role="button"] {
     -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
     outline: none !important;
+    border-color: transparent !important; /* જો બોર્ડર હાઇલાઇટ થતી હોય તો */
+}
+
+/* ઇનપુટ અને ટેક્સ્ટએરિયા ફોકસ થાય ત્યારે પણ બ્લુ આઉટલાઇન ના આવે તેના માટે */
+input:focus, textarea:focus, button:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
