@@ -1253,3 +1253,8 @@ body.dark-mode .citation-link {
 body.dark-mode .citation-link:hover {
     background: #374151;
 }
+
+/* આખા પેજ પરથી અથવા સ્પેસિફિક એલિમેન્ટ્સ પરથી બ્લુ હાઈલાઈટ હટાવવા માટે */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
