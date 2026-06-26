@@ -1254,7 +1254,14 @@ body.dark-mode .citation-link:hover {
     background: #374151;
 }
 
-/* આખા પેજ પરથી અથવા સ્પેસિફિક એલિમેન્ટ્સ પરથી બ્લુ હાઈલાઈટ હટાવવા માટે */
 * {
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none; /* લોન્ગ પ્રેસ મેનૂ રોકવા માટે (ઓપ્શનલ) */
+    outline: none !important;
+}
+
+/* ખાસ કરીને બટન, લિંક અને ક્લિકેબલ વસ્તુઓ માટે */
+button, a, input, select, textarea, [role="button"] {
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
 }
