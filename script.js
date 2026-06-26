@@ -344,7 +344,7 @@ async function askAI() {
     if (typeof showLoading === "function") showLoading();
 
     // ⚠️ 👈 તારી સાચી Gemini API Key (AIzaSy...) અહીં ડબલ કોટ્સની વચ્ચે લખી દેજે
-    const apiKey = "AIzaSyYourActualKeyHere..."; 
+    const apiKey = "AQ.Ab8RN6KfJzW_400mdAzQOOKYIwDqxwJP7HO4fQHAEZtFQfO-dg"; 
 
     let apiContents = [];
 
