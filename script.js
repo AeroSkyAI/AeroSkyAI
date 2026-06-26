@@ -363,7 +363,7 @@ async function askAI() {
     // જો તારી એપમાં શો લોડિંગ ફંક્શન હોય તો રન થશે
     if (typeof showLoading === "function") showLoading();
 
-    const apiKey = "AQ.Ab8RN6KfJzW_400mdAzQOOKYIwDqxwJP7HO4fQHAEZtFQfO-dg; // 👈 તારી સાચી Gemini API Key અહીં લખી દેજે
+    const apiKey = "AQ.Ab8RN6KfJzW_400mdAzQOOKYIwDqxwJP7HO4fQHAEZtFQfO-dg"; // 👈 તારી સાચી Gemini API Key અહીં લખી દેજે
 
     // 🧠 3. HUGE CONTEXT WINDOW & MULTIMODAL PAYLOAD SYSTEM
     let apiContents = [];
