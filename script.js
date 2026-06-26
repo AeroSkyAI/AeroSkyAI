@@ -2,13 +2,12 @@
 // 🧠 AeroSky AI - CORE APPLICATION STATE
 // ======================================================
 
-// ૧. ફાઈલની સાવ ઉપર આ રીતે APP ઓબ્જેક્ટ હોવો જરૂરી છે
 window.APP = window.APP || {
     chats: [],
     activeChatId: null
 };
 
-const STORAGE_KEY = "aerosky_chats"; // નામ બદલીને યુનિક કર્યું
+const STORAGE_KEY = "aerosky_chats"; 
 
 
 // ======================================================
@@ -19,7 +18,6 @@ function generateId(){
     return Date.now() + Math.floor(Math.random()*10000);
 }
 
-// સિક્યોરિટી માટે: કોડની અંદરના < અને > સાઇનને ટેક્સ્ટમાં બદલવા માટે
 function escapeHTML(html) {
     return html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -37,11 +35,9 @@ function saveToStorage() {
             return;
         }
 
-        // લોકલ સ્ટોરેજમાં સેવ કરવાનો ટ્રાય
-        localStorage.setItem("aerosky_chats", JSON.stringify(APP.chats));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(APP.chats));
         console.log("૧. લોકલ સ્ટોરેજમાં સેવ થઈ ગયું!");
 
-        // ફાયરબેઝમાં સેવ કરવાનો ટ્રાય
         if (typeof database !== "undefined" && database !== null) {
             database.ref("chats").set(APP.chats)
             .then(() => {
@@ -61,8 +57,7 @@ function saveToStorage() {
 function loadFromStorage() {
     console.log("=== LOAD START ===");
     
-    // પહેલા લોકલ સ્ટોરેજમાંથી ડેટા લોડ કરો
-    const localData = localStorage.getItem("aerosky_chats");
+    const localData = localStorage.getItem(STORAGE_KEY);
     if (localData && localData !== "undefined" && localData !== "null") {
         try {
             APP.chats = JSON.parse(localData);
@@ -73,7 +68,6 @@ function loadFromStorage() {
         }
     }
 
-    // હવે લાઈવ ફાયરબેઝ ચેક કરો
     if (typeof database !== "undefined" && database !== null) {
         database.ref("chats").once("value")
         .then((snapshot) => {
@@ -82,22 +76,19 @@ function loadFromStorage() {
             
             if (data && Array.isArray(data) && data.length > 0) {
                 APP.chats = data;
-                localStorage.setItem("aerosky_chats", JSON.stringify(APP.chats));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(APP.chats));
             } else {
                 console.log("ફાયરબેઝ ખાલી છે.");
-                // જો બધેથી ખાલી હોય તો જ નવી ચેટ બનાવવી
                 if (APP.chats.length === 0) {
-                    if (typeof createNewChat === "function") { createNewChat(); return; }
-                    if (typeof createChat === "function") { createChat(); return; }
+                    createChat(); 
+                    return;
                 }
             }
             
-            // એક્ટિવ ચેટ આઈડી સેટ કરો જેથી મેસેજ ગાયબ ન થાય
             if (APP.chats.length > 0 && !APP.activeChatId) {
                 APP.activeChatId = APP.chats[0].id;
             }
             
-            // હવે કમ્પલસરી રેન્ડર કરો
             if (typeof renderSidebar === "function") renderSidebar();
             if (typeof renderMessages === "function") renderMessages();
         })
@@ -110,7 +101,6 @@ function loadFromStorage() {
     }
 }
 
-// ફોલબેક રેન્ડર ફંક્શન
 function renderDefault() {
     if (APP.chats.length > 0) {
         if (!APP.activeChatId) APP.activeChatId = APP.chats[0].id;
@@ -125,7 +115,7 @@ function renderDefault() {
 // ======================================================
 
 function getCurrentChat(){
-    return APP.chats.find(chat => chat.id === APP.currentChatId);
+    return APP.chats.find(chat => chat.id === APP.activeChatId);
 }
 
 function createChat(){
@@ -139,7 +129,7 @@ function createChat(){
     };
 
     APP.chats.push(chat);
-    APP.currentChatId = chat.id;
+    APP.activeChatId = chat.id;
 
     saveToStorage();
     renderSidebar();
@@ -149,7 +139,7 @@ function createChat(){
 }
 
 function switchChat(chatId){
-    APP.currentChatId = chatId;
+    APP.activeChatId = chatId;
     saveToStorage();
     renderSidebar();
     renderMessages();
@@ -174,20 +164,17 @@ function renderSidebar(){
 
     sortedChats.forEach(chat => {
         const div = document.createElement("div");
-        div.className = "chat-item" + (chat.id === APP.currentChatId ? " active" : "");
+        div.className = "chat-item" + (chat.id === APP.activeChatId ? " active" : "");
 
-        // ચેટનું નામ
         const name = document.createElement("span");
         name.className = "chat-name";
         name.textContent = (chat.pinned ? "📌 " : "") + chat.name;
         name.onclick = () => switchChat(chat.id);
         
-        // ⋮ મેનુ બટન
         const menu = document.createElement("span");
         menu.className = "chat-menu"; 
         menu.innerHTML = "⋮";
 
-        // ડ્રોપડાઉન મેનુ
         const dropdown = document.createElement("div");
         dropdown.className = "chat-dropdown";
         dropdown.innerHTML = `
@@ -221,7 +208,6 @@ function renderSidebar(){
     });
 }
 
-// ગ્લોબલ ક્લિક: બહાર ક્લિક કરવાથી ડ્રોપડાઉન બંધ થશે
 document.addEventListener("click", function(){
     document.querySelectorAll(".chat-dropdown").forEach(dropdown => {
         dropdown.classList.remove("show");
@@ -262,9 +248,8 @@ function renderMessages() {
 
     chat.messages.forEach(msg => {
         const div = document.createElement("div");
-        div.className = msg.role; // 'user' અથવા 'ai'
+        div.className = msg.role; 
         
-        // 📸 જો આ મેસેજ ઓબ્જેક્ટમાં ઈમેજ ડેટા સેવ હોય તો તેનો HTML એડ કરો
         let imageHTML = "";
         if (msg.image) {
             imageHTML = `<img src="${msg.image}" class="chat-sent-image" style="max-width: 200px; max-height: 200px; border-radius: 10px; margin-bottom: 8px; display: block; object-fit: cover; border: 1px solid rgba(255,255,255,0.2);">`;
@@ -273,7 +258,6 @@ function renderMessages() {
         if (msg.role === "ai" && typeof marked !== "undefined") {
             div.innerHTML = marked.parse(msg.content);
         } else {
-            // યુઝરના મેસેજમાં પહેલા અસલી ઈમેજ દેખાશે, અને નીચે જો કઈ લખ્યું હશે તો ટેક્સ્ટ દેખાશે
             div.innerHTML = imageHTML + (msg.content ? `<span>${msg.content}</span>` : "");
         }
         
@@ -323,20 +307,17 @@ async function askAI() {
     if (!input) return;
     
     const question = input.value.trim();
-    // જો ટેક્સ્ટ પણ ખાલી હોય અને ઇમેજ પણ સિલેક્ટ ન કરી હોય તો અહીંથી જ પાછા વળો
     if (question === "" && !selectedImageData) return;
 
-    // 🖼️ 1. ઇમેજ સિલેક્ટ કરી હોય તો તેનો પૂરો ડેટા (Base64) મેળવો
     let imgSrcForChat = null;
     if (selectedImageData && selectedImageData.inlineData) {
         const previewImg = document.querySelector("#imagePreviewContainer img");
         if (previewImg) imgSrcForChat = previewImg.src; 
     }
 
-    // 💬 2. કરન્ટ ચેટ ચેક કરો, જો ન હોય તો નવી બનાવો
     let chat = getCurrentChat();
     if (!chat) {
-        chat = createChat(); // જો કોઈ ચેટ એક્ટિવ ન હોય તો નવી ચેટ બનશે
+        chat = createChat(); 
     }
 
     if (chat) {
@@ -346,7 +327,7 @@ async function askAI() {
             content: question,
             image: imgSrcForChat 
         });
-        if (typeof saveToStorage === "function") saveToStorage();
+        saveToStorage();
     }
 
     if (typeof autoRenameChat === "function") {
@@ -360,20 +341,17 @@ async function askAI() {
 
     renderMessages();
     
-    // જો તારી એપમાં શો લોડિંગ ફંક્શન હોય તો રન થશે
     if (typeof showLoading === "function") showLoading();
 
-    // ⚠️ 👈 અહીં તારી સાચી Gemini API Key નાખજે જે AIzaSy થી શરૂ થતી હોય
-    const apiKey = "AQ.Ab8RN6KfJzW_400mdAzQOOKYIwDqxwJP7HO4fQHAEZtFQfO-dg"; 
+    // ⚠️ 👈 તારી સાચી Gemini API Key (AIzaSy...) અહીં ડબલ કોટ્સની વચ્ચે લખી દેજે
+    const apiKey = "AIzaSyYourActualKeyHere..."; 
 
-    // 🧠 3. HUGE CONTEXT WINDOW & MULTIMODAL PAYLOAD SYSTEM
     let apiContents = [];
 
     if (chat && chat.messages) {
         chat.messages.forEach(msg => {
             let parts = [];
             
-            // જો મેસેજમાં ઇમેજ હોય તો જ આ બ્લોક ચાલશે
             if (msg.image && msg.role === "user") {
                 try {
                     const mimeType = msg.image.match(/data:(.*?);base64/)[1];
@@ -389,7 +367,6 @@ async function askAI() {
                 }
             }
             
-            // ટેક્સ્ટ કન્ટેન્ટ ઉમેરો
             if (msg.content) {
                 if (msg.id === chat.messages[chat.messages.length - 1].id) {
                     parts.push({
@@ -438,7 +415,7 @@ async function askAI() {
                 content: "⚠️ API Error: Please check your API Key and try again."
             });
             
-            if (typeof saveToStorage === "function") saveToStorage();
+            saveToStorage();
             renderMessages();
             return;
         }
@@ -446,7 +423,6 @@ async function askAI() {
         const data = await response.json();
         let answer = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
         
-        // Sources / Citations લોજિક
         const searchChunks = data?.candidates?.[0]?.groundingMetadata?.groundingChunks;
         if (searchChunks && searchChunks.length > 0) {
             let citationHTML = "<div class='sources-container'><p style='margin:10px 0 5px 0; font-size:12px; font-weight:bold; color:#64748b;'>🌐 Sources:</p><div class='sources-list'>";
@@ -459,7 +435,6 @@ async function askAI() {
             answer += "\n\n" + citationHTML;
         }
         
-        // 🌊 STREAMING RESPONSE LOGIC (અહીંથી અધૂરો કોડ પૂરો કર્યો છે)
         const aiMessageId = generateId();
         chat.messages.push({ id: aiMessageId, role: "ai", content: "" });
         renderMessages();
@@ -472,35 +447,34 @@ async function askAI() {
         if (lastAiBubble) {
             lastAiBubble.innerHTML = "";
 
-        function streamText() {
-            if (index < answer.length) {
-                let currentText = answer.substring(0, index + 1);
-                if (typeof marked !== "undefined") {
-                    lastAiBubble.innerHTML = marked.parse(currentText);
+            function streamText() {
+                if (index < answer.length) {
+                    let currentText = answer.substring(0, index + 1);
+                    if (typeof marked !== "undefined") {
+                        lastAiBubble.innerHTML = marked.parse(currentText);
+                    } else {
+                        lastAiBubble.innerHTML = currentText;
+                    }
+                    index++;
+                    chatBox.scrollTop = chatBox.scrollHeight; 
+                    setTimeout(streamText, 8); 
                 } else {
-                    lastAiBubble.innerHTML = currentText;
-                }
-                index++;
-                chatBox.scrollTop = chatBox.scrollHeight; 
-                setTimeout(streamText, 8); 
-            } else {
-                const msgIndex = chat.messages.findIndex(m => m.id === aiMessageId);
-                if (msgIndex !== -1) {
-                    chat.messages[msgIndex].content = answer;
-                    if (typeof saveToStorage === "function") saveToStorage();
+                    const msgIndex = chat.messages.findIndex(m => m.id === aiMessageId);
+                    if (msgIndex !== -1) {
+                        chat.messages[msgIndex].content = answer;
+                        saveToStorage();
+                    }
                 }
             }
+            streamText();
         }
-        
-        streamText();
 
     } catch (error) {
         if (typeof hideLoading === "function") hideLoading();
         if (typeof clearImageSelect === "function") clearImageSelect();
-        console.error(error);
+        console.error("🚨 Error inside askAI:", error);
     }
 }
-
 /* ======================================================
    📷 IMAGE UPLOAD & PREVIEW SYSTEM
 ====================================================== */
