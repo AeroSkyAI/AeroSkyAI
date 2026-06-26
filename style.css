@@ -744,7 +744,7 @@ body.dark-mode .danger-zone .item-title {
 
     /* 🎯 આ નવો ક્લાસ ખાસ ઉમેરી દે, જે તારા પ્રોફાઇલ કાર્ડને નીચેથી ધક્કો મારશે */
     .sidebar-profile {
-        margin-bottom: 40px !important; /* આનાથી કાર્ડ ફોનની પટ્ટીથી ઘણું ઉપર આવી જશે */
+        margin-bottom: 20px !important; /* આનાથી કાર્ડ ફોનની પટ્ટીથી ઘણું ઉપર આવી જશે */
     }
 }
     
