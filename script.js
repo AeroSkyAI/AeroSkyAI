@@ -363,7 +363,8 @@ async function askAI() {
     // જો તારી એપમાં શો લોડિંગ ફંક્શન હોય તો રન થશે
     if (typeof showLoading === "function") showLoading();
 
-    const apiKey = "AQ.Ab8RN6KfJzW_400mdAzQOOKYIwDqxwJP7HO4fQHAEZtFQfO-dg"; // 👈 તારી સાચી Gemini API Key અહીં લખી દેજે
+    // ⚠️ 👈 અહીં તારી સાચી Gemini API Key નાખજે જે AIzaSy થી શરૂ થતી હોય
+    const apiKey = "AQ.Ab8RN6KfJzW_400mdAzQOOKYIwDqxwJP7HO4fQHAEZtFQfO-dg"; 
 
     // 🧠 3. HUGE CONTEXT WINDOW & MULTIMODAL PAYLOAD SYSTEM
     let apiContents = [];
@@ -431,7 +432,6 @@ async function askAI() {
         if (typeof clearImageSelect === "function") clearImageSelect();
 
         if (!response.ok) {
-            // એરરને ડાયરેક્ટ HTML માં નાખવાની જગ્યાએ મેસેજ એરેમાં પુશ કરો
             chat.messages.push({
                 id: generateId(),
                 role: "ai",
@@ -459,7 +459,7 @@ async function askAI() {
             answer += "\n\n" + citationHTML;
         }
         
-        // 🌊 STREAMING RESPONSE LOGIC
+        // 🌊 STREAMING RESPONSE LOGIC (અહીંથી અધૂરો કોડ પૂરો કર્યો છે)
         const aiMessageId = generateId();
         chat.messages.push({ id: aiMessageId, role: "ai", content: "" });
         renderMessages();
@@ -469,7 +469,8 @@ async function askAI() {
         const lastAiBubble = aiBubbles[aiBubbles.length - 1];
 
         let index = 0; 
-        if (lastAiBubble) lastAiBubble.innerHTML = "";
+        if (lastAiBubble) {
+            lastAiBubble.innerHTML = "";
 
         function streamText() {
             if (index < answer.length) {
