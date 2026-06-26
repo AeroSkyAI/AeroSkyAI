@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>AeroSky AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <div class="overlay" onclick="closeSidebar()"></div>
+
+    <div class="sidebar">
+        
+        <div class="sidebar-logo">
+            <img src="Aviation AI.png" alt="Aviation AI Logo">
+        </div>
+
+        <button class="search-chat-btn" onclick="openSettings()">
+            ⚙ Settings
+        </button>
+
+        <button class="new-chat-btn" onclick="createNewChat()"> + New Chat
+        </button>
+
+        <button class="search-chat-btn" onclick="searchChats()">
+            Search Chats
+        </button>
+
+        <div id="chatList"></div>
+        
+        <div class="sidebar-profile" id="userProfileCard">
+            <div class="profile-avatar" id="userAvatar">👤</div>
+            <div class="profile-info">
+                <div class="profile-name" id="displayUserName">Guest User</div>
+                <div class="profile-rank" id="displayUserRank">Aviation Enthusiast</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="settingsModal" class="custom-modal-overlay">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h3>⚙️ Settings</h3>
+                <button class="modal-x-btn" onclick="closeSettings()">✕</button>
+            </div>
+
+            <div class="custom-modal-body">
+                
+                <div class="settings-list-item" onclick="editUserProfileFromSettings()">
+                    <div class="item-left">
+                        <span class="item-icon">👤</span>
+                        <span class="item-title">Edit Profile Details</span>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-arrow">→</span>
+                    </div>
+                </div>
+                
+                <div class="settings-list-item" style="cursor: default;">
+                    <div class="item-left">
+                        <span class="item-icon">🌙</span>
+                        <span class="item-title">Dark Mode</span>
+                    </div>
+                    <div class="item-right">
+                        <label class="premium-switch">
+                            <input type="checkbox" id="darkModeToggle" onclick="toggleDarkMode()">
+                            <span class="premium-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-list-item" onclick="exportChats()">
+                    <div class="item-left">
+                        <span class="item-icon">📤</span>
+                        <span class="item-title">Export Chats</span>
+                    </div>
+                    <div class="item-right">
+                        <span class="item-arrow">→</span>
+                    </div>
+                </div>
+
+                <div class="settings-list-item" style="position: relative;">
+                    <label for="modalImportFile" class="item-label-trigger">
+                        <div class="item-left">
+                            <span class="item-icon">📥</span>
+                            <span class="item-title">Import Chats</span>
+                        </div>
+                        <div class="item-right">
+                            <span class="item-arrow">→</span>
+                        </div>
+                    </label>
+                    <input type="file" id="modalImportFile" onchange="importChats(event)" style="display: none;">
+                </div>
+
+                <div class="settings-list-item danger-zone" onclick="clearAllChats()">
+                    <div class="item-left">
+                        <span class="item-icon">🗑️</span>
+                        <span class="item-title">Clear All Chats</span>
+                    </div>
+                    <div class="item-right">
+                        <span class="danger-text">Delete All</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="custom-modal-footer">
+                <button class="modal-close-final-btn" onclick="closeSettings()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container">
+
+        <div class="header">
+            <button id="menuBtn" class="menu-btn" onclick="toggleSidebar()">
+                ☰
+            </button>
+            <h2 align="center">AeroSky AI</h2>
+        </div>
+
+        <div id="chat"></div>
+
+        <div class="input-area">
+            <div class="input-container" style="position: relative;">
+                
+                <button type="button" class="upload-plus-btn" onclick="toggleModal(event)" title="Attach File">+</button>
+                
+                <div id="uploadModal" class="small-popup-box">
+                    <div class="small-popup-opt" onclick="triggerFileInput()">
+                        <span class="popup-icon">📷</span>
+                        <span class="popup-text">Add Image</span>
+                    </div>
+                </div>
+
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageSelect(this)">
+                <div id="imagePreviewContainer" class="image-preview-box" style="display: none;"></div>
+
+                <textarea id="userInput" placeholder="Ask AeroSky AI..." rows="1" oninput="autoGrow(this)"></textarea>
+                <button id="sendBtn" onclick="askAI()">➔</button>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyC75XezQEt0RdofN_TzfMN8VNTyIjT8oHo",
+    authDomain: "aerosky-ai-chat.firebaseapp.com",
+    databaseURL: "https://aerosky-ai-chat-default-rtdb.firebaseio.com",
+    projectId: "aerosky-ai-chat",
+    storageBucket: "aerosky-ai-chat.firebasestorage.app",
+    messagingSenderId: "260269245444",
+    appId: "1:260269245444:web:37772f6aa6dfa9921ae151",
+    measurementId: "G-YTR3CN46Y0"
+  };
+
+  // ફાયરબેઝ ચાલુ કરો
+  firebase.initializeApp(firebaseConfig);
+
+  // ગ્લોબલ ડેટાબેઝ વેરિયેબલ
+  var database = firebase.database();
+</script>
+
+<script src="script.js"></script>
+
+</body>
+</html>
